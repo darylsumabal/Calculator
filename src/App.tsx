@@ -10,29 +10,30 @@ type HistoryValue = {
 function App() {
   const [result, setShowResult] = useState<boolean>(false);
   const [display, setDisplay] = useState<string>("");
-  const [history, setShowHistory] = useState<boolean>(false);
-  const [t, setT] = useState<HistoryValue[]>([{ value: "", ans: "" }]);
+  const [historyButton, setHistoryButton] = useState<boolean>(false);
+  const [history, setHistory] = useState<HistoryValue[]>([]);
   const maxLimit = 15;
 
   //use to get the value from local storage
   useEffect(() => {
     const savedHistory = localStorage.getItem("score");
     if (savedHistory) {
-      setT(JSON.parse(savedHistory));
+      setHistory(JSON.parse(savedHistory));
     }
   }, []);
 
   const calculateResult = () => {
     if (display.length !== 0) {
       try {
-        let calcResult = eval(display);
+        const calc: number = eval(display);
         //maximum of 3decimal
-        calcResult = parseFloat(calcResult.toFixed(3));
+        const calcResult: string = parseFloat(calc.toFixed(3)).toString();
 
         setDisplay(calcResult);
+        const historyResult = [{ value: display, ans: calcResult }, ...history];
+        setHistory(historyResult);
 
-        setT((prev) => [{ value: display, ans: calcResult }, ...prev]);
-        localStorage.setItem("score", JSON.stringify(t));
+        localStorage.setItem("score", JSON.stringify(historyResult));
         setShowResult(true);
       } catch (error) {
         setDisplay("ERROR" + error);
@@ -40,14 +41,20 @@ function App() {
     } else setDisplay("");
   };
 
+  const handleClearHistory = () => {
+    localStorage.removeItem("score");
+    setHistory([]);
+  };
+
   //use to click handle the button click and get the value
   const handleButton = (value: string) => {
-    console.log(value);
     setShowResult(false);
 
     if (value === "AC") setDisplay("");
-    else if (value === "HISTORY") setShowHistory(!history);
-    else if (value === "C") setDisplay(display.slice(0, -1));
+    else if (value === "HISTORY") {
+      setHistoryButton(!historyButton);
+      setDisplay("");
+    } else if (value === "C") setDisplay(display.slice(0, -1));
     else if (isOperator(value)) {
       if (display == "" || isOperator(display[display.length - 1])) return;
       setDisplay(display + value);
@@ -87,17 +94,25 @@ function App() {
               ))}
             </div>
           </div>
-          {history && (
+          {historyButton && (
             <div className="absolute bg-white h-full w-72 md:w-full space-y-2 p-4">
-              <button
-                onClick={() => setShowHistory(!history)}
-                className="font-medium text-sm cursor-pointer hover:text-slate-600"
-              >
-                Back
-              </button>
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={() => setHistoryButton(!historyButton)}
+                  className="font-medium text-sm cursor-pointer hover:text-slate-600"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleClearHistory}
+                  className="font-medium text-sm cursor-pointer hover:text-slate-600"
+                >
+                  Clear History
+                </button>
+              </div>
 
               <div>
-                {t.map((i, index) => (
+                {history.map((i, index) => (
                   <div key={index}>
                     <div className="text-2xl">
                       {i.value} {i.value && `= ${i.ans}`}
