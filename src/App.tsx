@@ -26,10 +26,12 @@ function App() {
     if (display.length !== 0) {
       try {
         const calc: number = eval(display);
-        //maximum of 3decimal
+        //maximum of 3 decimal
         const calcResult: string = parseFloat(calc.toFixed(3)).toString();
 
+        //displayResult
         setDisplay(calcResult);
+
         const historyResult = [{ value: display, ans: calcResult }, ...history];
         setHistory(historyResult);
 
@@ -56,7 +58,7 @@ function App() {
       setDisplay("");
     } else if (value === "C") setDisplay(display.slice(0, -1));
     else if (isOperator(value)) {
-      if (display == "" || isOperator(display[display.length - 1])) return;
+      if (display == "" || isOperator(display[display.length - 1])) return; // return if operator is clicked first
       setDisplay(display + value);
     } else if (value === "EQUALS") calculateResult();
     else if (display.length >= maxLimit)
